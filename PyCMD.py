@@ -1,0 +1,3 @@
+import info
+
+info.info()
