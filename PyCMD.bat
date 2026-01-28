@@ -1,3 +1,5 @@
 @echo off
 
-py PyCMD.py
+
+
+py C:\pycmd\PyCMD.py
