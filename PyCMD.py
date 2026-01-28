@@ -2,6 +2,7 @@ import subprocess
 import os
 import info
 import Start
+import xml.etree.ElementTree as ET
 
 os.system("cls")
 info.info()
@@ -26,11 +27,16 @@ while True:
     elif command.lower() == "clear":
         os.system("cls")
     elif command.lower() == "cd":
-        cel = input("Podaj ścieżkę katalogu: ")
+        cel = input("Podaj ścieżkę katalogu (w formacie C:\...): ")
         os.system("cd " + cel)
     elif command.lower() == "ls":
-        cel = input("Podaj ścieżkę katalogu (naciśnij Enter dla bieżącego katalogu): ")
+        cel = input("Podaj ścieżkę katalogu w formaci C:\... (naciśnij Enter dla bieżącego katalogu): ")
         if cel == "":   
             cel = current_directory
         for item in os.listdir(cel):
             print(item)
+    print("\n")
+
+    with open('config.txt', 'r', encoding='utf-8') as file:
+        for linia in file:
+            print(linia.strip()) # strip() usuwa znaki nowej linii
