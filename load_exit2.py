@@ -1,7 +1,7 @@
 from rich.console import Console
 import time
 
-def load_exit2():
+def load_exit():
 
     console = Console()
 
