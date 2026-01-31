@@ -1,10 +1,10 @@
 import subprocess
 import os
-import info
-import Start
-import load_exit2
+import modules.info as info
+import modules.Start as Start
+import modules.load_exit2 as load_exit2
 import time
-import help
+import modules.help as help
 
 
 def clear():
