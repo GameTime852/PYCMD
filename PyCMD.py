@@ -19,7 +19,7 @@ info.info()
 with open('config.txt', 'r', encoding='utf-8') as f:
     lines = f.readlines()
     started = lines[0]
-    first = lines[2]
+    # first = lines[2]
 
 
 if not started == "started = true\n":
@@ -31,8 +31,8 @@ if not started == "started = true\n":
         f.write(lines[0])
 
 
-if first == "first = true\n":
-    print("Witaj w PyCMD!")
+#if first == "first = true\n":
+ #   print("Witaj w PyCMD!")
 
 # Pobranie i wyświetlenie bieżącego katalogu
 
