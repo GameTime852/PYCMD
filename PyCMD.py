@@ -1,10 +1,12 @@
-import subprocess
 import os
+import time
+
+import modules.help as help
 import modules.info as info
 import modules.Start as Start
 import modules.load_exit2 as load_exit2
-import time
-import modules.help as help
+
+
 
 
 def clear():
@@ -28,11 +30,11 @@ if not started == "started = true\n":
 
     with open('config.txt', 'w', encoding='utf-8') as f:
         f.write("started = true\n")
-        f.write(lines[0])
+        f.write(lines[1])
 
 
 #if first == "first = true\n":
- #   print("Witaj w PyCMD!")
+#   print("Witaj w PyCMD!")
 
 # Pobranie i wyświetlenie bieżącego katalogu
 
@@ -42,11 +44,11 @@ while True:
     command = input(current_directory+"> ")
 
     if command.lower() == "exit":
-        os.system("cls")
+        clear()
         load_exit2.load_exit()
         with open('config.txt', 'w', encoding='utf-8') as f:
             f.write("started = false\n")
-            f.write(lines[0])
+            f.write(lines[1])
 
         exit()
     elif command.lower() == "help":
@@ -55,16 +57,23 @@ while True:
     elif command.lower() == "about":
         info.info()
     elif command.lower() == "clear":
-        os.system("cls")
+        clear()
     elif command.lower() == "cd":
-        cel = input(r"Podaj ścieżkę katalogu (w formacie C:\...): ")
-        os.chdir(cel)
+        cel = input(r"Podaj ścieżkę katalogu (w formacie C:\...) / (do poprzedniego katalogu wpisz ..): ")
+        try:
+            os.chdir(cel)
+        except FileNotFoundError:
+            print(f"Nie znaleziono katalogu: {cel}")
     elif command.lower() == "ls":
         cel = input(r"Podaj ścieżkę katalogu w formacie C:\... (naciśnij Enter dla bieżącego katalogu): ")
         if cel == "":   
             cel = current_directory
-        for item in os.listdir(cel):
-            print(item)
+        try:
+            for item in os.listdir(cel):
+                print(item)
+        except FileNotFoundError:
+            print(f"Nie znaleziono katalogu: {cel}")
+            continue
     elif command.lower() == "pwd":
         print(current_directory)
     elif command.lower() == "status":
