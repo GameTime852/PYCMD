@@ -15,3 +15,9 @@
 * Fixed some bugs
 * Added command "config"
 * Updated help screen
+
+#### **Version 0.2:**
+
+* Fixed some bugs
+* Added mods system
+* Added logs system
