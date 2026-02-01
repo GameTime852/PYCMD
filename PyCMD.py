@@ -1,5 +1,6 @@
 import os
 import time
+from pathlib import Path
 
 import modules.help as help
 import modules.info as info
@@ -13,6 +14,14 @@ def clear():
     os.system("cls")
 def wait(seconds):
     time.sleep(seconds)
+
+
+
+file_path = Path('config.txt')
+
+if not file_path.exists():
+    # Tworzenie pliku, jeśli nie istnieje
+    file_path.touch()
 
 
 os.system("cls")

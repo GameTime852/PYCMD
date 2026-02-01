@@ -8,3 +8,4 @@
 * Added system required to README.md
 * Added CHANGELOG.md
 * Moved some modules to folder "modules"
+* Moved CHANGELOG.md and README.md to folder "docs"
