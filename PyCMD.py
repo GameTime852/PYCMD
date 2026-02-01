@@ -99,7 +99,8 @@ while True:
             print("Status ustawiony na OFF.")
         else:
             print("Nieprawidłowa wartość statusu. Użyj 'on' lub 'off'.")
-
+    elif command.strip() == "config":
+        os.system("notepad config.txt")
     else:
         print(f"Nieznane polecenie: {command}. Wpisz 'help' aby uzyskać pomoc.")
     

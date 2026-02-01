@@ -9,3 +9,4 @@ def help(page=1):
         print("  cd    - Zmienia bieżący katalog")
         print("  ls    - Wyświetla zawartość katalogu")
         print("  exit  - Zamyka PyCMD")
+        print("  pwd   - Wyświetla bieżący katalog")

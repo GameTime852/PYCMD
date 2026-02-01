@@ -11,5 +11,3 @@ def load_start():
         # Tutaj umieść swój kod, który zajmuje czas
         time.sleep(2)
 
-if __name__ == "__main__":
-    load_start()

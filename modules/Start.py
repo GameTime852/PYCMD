@@ -1,7 +1,7 @@
-import os
+import modules.load_start as load_start
 import subprocess
 
 def start():
-    subprocess.run(["python", "load_start.py"])
+    load_start.load_start()
 
 
