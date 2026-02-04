@@ -21,3 +21,11 @@
 * Fixed some bugs
 * Added mods system
 * Added logs system
+
+#### **Version 1.0:**
+
+* Official release
+* Fixed some bugs
+* Added temporary celebration screen
+* Plans for next ver: 
+    * Add system for turning off mods 

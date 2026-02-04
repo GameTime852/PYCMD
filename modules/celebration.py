@@ -34,3 +34,4 @@ def celebrate():
 
     time.sleep(0.1)
     console.clear() # Wyczyść ekran po zakończeniu, aby przejść do programu
+    

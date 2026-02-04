@@ -210,3 +210,4 @@ while True:
         if command.strip():
             print(f"Nieznane polecenie: {command}")
             logging.warning(f"Nieznane polecenie: {command}")
+

@@ -1,2 +1,0 @@
-[17:35:51] INFO: --- START SYSTEMU ---
-[17:35:51] INFO: Brak modów do załadowania.
