@@ -6,11 +6,18 @@ import logging
 import atexit  # <--- NOWE: Do czyszczenia przy wyjściu
 from pathlib import Path
 
-# Importy twoich modułów
 import modules.help as help
 import modules.info as info
 import modules.Start as Start
 import modules.load_exit2 as load_exit2
+import modules.celebration as celebration
+
+
+first_file = Path("first")
+if first_file.exists() and first_file.is_file():
+    celebration.celebrate()  # Uruchom moduł celebracji
+    first_file.unlink(missing_ok=True)
+
 
 # --- KONFIGURACJA LOGÓW ---
 # Podczas działania programu logi są zapisywane tutaj.
@@ -117,6 +124,9 @@ if not started == "started = true\n":
     with open('config.txt', 'w', encoding='utf-8') as f:
         f.write("started = true\n")
         if len(lines) > 1: f.writelines(lines[1:])
+
+
+
 
 # --- PĘTLA GŁÓWNA ---
 

@@ -1,3 +1,2 @@
-[15:30:56] INFO: --- START SYSTEMU ---
-[15:30:56] INFO: ZAŁADOWANO: math
-[15:31:02] INFO: CMD: math
+[17:35:51] INFO: --- START SYSTEMU ---
+[17:35:51] INFO: Brak modów do załadowania.
