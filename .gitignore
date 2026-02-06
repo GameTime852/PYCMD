@@ -1,2 +1,3 @@
-mods/dev_tools/
+mods/*
+!mods/.gitkeep
 temp/
