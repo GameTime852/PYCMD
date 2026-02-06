@@ -3,7 +3,8 @@ import time
 import importlib.util
 import sys
 import logging
-import atexit  # <--- NOWE: Do czyszczenia przy wyjściu
+import json  # <--- Konieczne do zapisu configu modów
+import atexit
 from pathlib import Path
 
 import modules.help as help
@@ -13,14 +14,13 @@ import modules.load_exit2 as load_exit2
 import modules.celebration as celebration
 
 
-first_file = Path("first")
-if first_file.exists() and first_file.is_file():
-    celebration.celebrate()  # Uruchom moduł celebracji
-    first_file.unlink(missing_ok=True)
+# first_file = Path("first")
+# if first_file.exists() and first_file.is_file():
+#     celebration.celebrate()
+#     first_file.unlink(missing_ok=True)
 
 
 # --- KONFIGURACJA LOGÓW ---
-# Podczas działania programu logi są zapisywane tutaj.
 logging.basicConfig(
     filename='logs.txt',
     level=logging.INFO,
@@ -30,27 +30,56 @@ logging.basicConfig(
     encoding='utf-8'
 )
 
-# --- NOWE: CZYSZCZENIE LOGÓW PO ZAMKNIĘCIU ---
+# --- CZYSZCZENIE LOGÓW PO ZAMKNIĘCIU ---
 def clean_logs_on_exit():
     """Funkcja uruchamiana automatycznie przy zamykaniu programu."""
-    logging.shutdown() # Zwalniamy plik logs.txt
+    logging.shutdown()
     try:
-        # Otwieramy plik w trybie 'w' i nic nie piszemy -> plik staje się pusty
         with open('logs.txt', 'w', encoding='utf-8') as f:
             pass 
     except Exception:
         pass
 
-# Rejestrujemy funkcję, aby wykonała się na samym końcu
 atexit.register(clean_logs_on_exit)
 
-# --- SYSTEM MODÓW ---
+# --- SYSTEM MODÓW I KONFIGURACJA ---
 
+MODS_CONFIG_FILE = 'mods_config.json'
 mod_commands = {}
 
-def load_mods():
-    """Ładuje mody w tle, pisząc tylko do logs.txt"""
+def load_disabled_mods():
+    """Wczytuje listę wyłączonych modów z pliku JSON."""
+    if not os.path.exists(MODS_CONFIG_FILE):
+        return []
+    try:
+        with open(MODS_CONFIG_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+def save_disabled_mods(disabled_list):
+    """Zapisuje listę wyłączonych modów."""
+    try:
+        with open(MODS_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(disabled_list, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(f"Błąd zapisu konfiguracji modów: {e}")
+
+def check_mod_exists(mod_name):
+    """Sprawdza, czy mod o danej nazwie istnieje (jako folder lub plik .py)."""
     mods_path = Path('mods')
+    # Sprawdź folder
+    if (mods_path / mod_name).is_dir() and (mods_path / mod_name / "main.py").exists():
+        return True
+    # Sprawdź plik .py
+    if (mods_path / f"{mod_name}.py").is_file():
+        return True
+    return False
+
+def load_mods():
+    """Ładuje mody w tle, pisząc tylko do logs.txt, pomija wyłączone."""
+    mods_path = Path('mods')
+    disabled_mods = load_disabled_mods() # Wczytaj wyłączone mody
     
     if not mods_path.exists():
         try:
@@ -65,6 +94,13 @@ def load_mods():
         return
 
     for item in mods_path.iterdir():
+        mod_name = item.stem if item.is_file() else item.name
+        
+        # SPRAWDZANIE CZY MOD JEST WYŁĄCZONY
+        if mod_name in disabled_mods:
+            logging.info(f"POMINIĘTO (WYŁĄCZONY): {mod_name}")
+            continue
+
         # 1. Foldery
         if item.is_dir():
             main_file = item / "main.py"
@@ -126,8 +162,6 @@ if not started == "started = true\n":
         if len(lines) > 1: f.writelines(lines[1:])
 
 
-
-
 # --- PĘTLA GŁÓWNA ---
 
 while True: 
@@ -151,7 +185,54 @@ while True:
             logging.error(f"Exception w modzie '{command_lower}': {e}")
         continue
 
-    # 2. WBUDOWANE
+    # 2. ZARZĄDZANIE MODAMI (STYL CD/LS)
+    elif command_lower == "mods":
+        action = input("Opcja (list/enable/disable): ").strip().lower()
+        disabled_mods = load_disabled_mods()
+        
+        if action == "list":
+            print("\n--- Lista Modów ---")
+            mods_path = Path('mods')
+            if mods_path.exists():
+                found_any = False
+                for item in mods_path.iterdir():
+                    if (item.is_dir() and (item / "main.py").exists()) or (item.suffix == ".py" and item.name != "__init__.py"):
+                        found_any = True
+                        name = item.stem if item.is_file() else item.name
+                        status = "[WYŁĄCZONY]" if name in disabled_mods else "[AKTYWNY]"
+                        print(f" - {name} {status}")
+                if not found_any:
+                    print("Brak zainstalowanych modów.")
+            else:
+                print("Folder mods nie istnieje.")
+            print("")
+
+        elif action == "disable":
+            target_mod = input("Nazwa moda: ").strip()
+            if not check_mod_exists(target_mod):
+                print(f"Błąd: Mod '{target_mod}' nie istnieje.")
+            elif target_mod in disabled_mods:
+                print(f"Mod '{target_mod}' jest już wyłączony.")
+            else:
+                disabled_mods.append(target_mod)
+                save_disabled_mods(disabled_mods)
+                print(f"Wyłączono moda '{target_mod}'. Zrestartuj PyCMD, aby zastosować zmiany.")
+
+        elif action == "enable":
+            target_mod = input("Nazwa moda: ").strip()
+            if not check_mod_exists(target_mod):
+                print(f"Błąd: Mod '{target_mod}' nie istnieje.")
+            elif target_mod not in disabled_mods:
+                print(f"Mod '{target_mod}' jest już aktywny.")
+            else:
+                disabled_mods.remove(target_mod)
+                save_disabled_mods(disabled_mods)
+                print(f"Włączono moda '{target_mod}'. Zrestartuj PyCMD, aby zastosować zmiany.")
+        
+        else:
+            print("Nieznana opcja. Dostępne: list, enable, disable")
+
+    # 3. WBUDOWANE
     elif command_lower == "exit":
         logging.info("Zamykanie...")
         clear()
@@ -210,4 +291,3 @@ while True:
         if command.strip():
             print(f"Nieznane polecenie: {command}")
             logging.warning(f"Nieznane polecenie: {command}")
-
