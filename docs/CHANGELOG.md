@@ -190,3 +190,9 @@
 
 
 * Updated changelog
+
+
+#### **Version 2.3_2:**
+
+
+* Edited .gitignore

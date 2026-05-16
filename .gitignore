@@ -4,3 +4,4 @@ temp/
 .tmp.driveupload/
 .tmp.drivedownload/
 __pycache__/
+.idea
