@@ -1,3 +1,8 @@
+# PyCMD Changelog
+
+###
+
+
 #### **Version 0.1.7:**
 
 
@@ -196,3 +201,15 @@
 
 
 * Edited .gitignore
+
+
+#### **Version 2.3.1:**
+
+
+* Added requirements.txt
+* Updated README
+
+#### **Version 3.0:**
+
+* Added user account
+* Added better mods usable (auto import) (to use type "<mod_name>.<function_name>()") (e.g. io.read())

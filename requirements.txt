@@ -1,0 +1,4 @@
+rich>=14.2.0
+requests>=2.28.0
+stdiomask>=0.0.6
+pip>=26.1.1

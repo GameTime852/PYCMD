@@ -5,3 +5,5 @@ temp/
 .tmp.drivedownload/
 __pycache__/
 .idea
+modules/__pycache__/
+.venv/

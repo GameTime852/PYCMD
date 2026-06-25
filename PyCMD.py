@@ -1,6 +1,7 @@
 import os
 import time
 import importlib.util
+import importlib
 import sys
 import logging
 import json  # <--- Konieczne do zapisu configu modów
@@ -14,9 +15,10 @@ import stdiomask
 import traceback
 import hashlib
 import requests
-
+# import mods.test.main
 
 console = console.Console()
+
 
 
 import updater
@@ -25,14 +27,19 @@ from modules import getmods, help, info, Start, load_exit2, reset, first, crit_r
 admin = False
 root = False
 
-def stop():
+def stop(code=0):
+    if code == 0:
+        pass
+    elif code == 1:
+        logging.warning("Błędny login lub hasło")
     logging.info("Zamykanie...")
     clear()
     load_exit2.load_exit()
-    try:
-        with open('config.txt', 'w', encoding='utf-8') as f:
-            f.writelines(["started = false\n"] + lines[1:])
-    except: pass
+    if code != 2:
+        try:
+            with open('config.txt', 'w', encoding='utf-8') as f:
+                f.writelines(["started = false\n"] + lines[1:])
+        except: pass
     exit()
 first_file = Path("first")
 if first_file.exists() and first_file.is_file():
@@ -174,9 +181,23 @@ def load_mods():
         logging.info("Brak modów do załadowania.")
         return
 
+    i = -1
     for item in mods_path.iterdir():
+        i += 1
+
+
         mod_name = item.stem if item.is_file() else item.name
-        
+        if mod_name != ".gitkeep":
+            nazwa = mod_name.split(" ")
+            nazwa_moda = nazwa[0]
+            # print(f"mods.{nazwa[0]}.main")
+            import_path = f"mods.{nazwa_moda}.main"
+            globals()[nazwa_moda] = importlib.import_module(import_path)
+        else:
+            continue
+
+
+
         # SPRAWDZANIE CZY MOD JEST WYŁĄCZONY
         if mod_name in disabled_mods:
             logging.info(f"POMINIĘTO (WYŁĄCZONY): {mod_name}")
@@ -196,7 +217,7 @@ def load_mods():
                         mod.register(mod_commands)
                         logging.info(f"ZAŁADOWANO: {item.name}")
                     else:
-                        logging.warning(f"ZAŁADOWANO TYLKO STARTUP: {item.name} (brak register)")
+                        logging.warning(f"ZAŁADOWANO TYLKO STARTUP I FUNKCJE: {item.name} (brak register)")
                 except Exception as e:
                     logging.error(f"BŁĄD KRYTYCZNY w {item.name}: {e}")
                     
@@ -214,6 +235,7 @@ def load_mods():
                     logging.warning(f"POMINIĘTO: {item.name}")
             except Exception as e:
                 logging.error(f"BŁĄD KRYTYCZNY w {item.name}: {e}")
+
 
 # --- FUNKCJE POMOCNICZE ---
 
@@ -241,18 +263,38 @@ with open('config.txt', 'r', encoding='utf-8') as f:
     prefix_line = lines[2]
     prefix = prefix_line.split("prefix = ")[-1].strip()
     admin_login = lines[3].split("admin_login = ")[-1].strip()
-    admin_haslo = lines[4].split("admin_haslo = ")[-1].strip()
+    admin_pass = lines[4].split("admin_pass = ")[-1].strip()
+    user_login = lines[5].split("user_login = ")[-1].strip()
+    user_pass = lines[6].split("user_pass = ")[-1].strip()
+
+def sprawdzenie_danych():
+    global user_login, user_pass
+
+    login = input("Podaj login (domyślnie user): ")
+    if login == "":
+        login = "user"
+    password = stdiomask.getpass("Podaj hasło: ")
+
+    if login == user_login and password == user_pass:
+        console.print("Zalogowano!", style = "bold green")
+    else:
+        console.print("Błędny login lub hasło!" , style = "bold red")
+        stop(1)
+
+    time.sleep(1)
+    clear()
+    info.info()
 
 def zmien_dane():
-    global admin_login, admin_haslo, lines, admin
+    global admin_login, admin_pass, lines, admin
     new_login = input("Ustaw login administratora (Enter dla pozostawienia): ").strip()
     new_password = stdiomask.getpass("Ustaw hasło administratora (Enter dla pozostawienia): ").strip()
     if new_login:
         admin_login = new_login
     if new_password:
-        admin_haslo = new_password
+        admin_pass = new_password
     
-    new_lines = [started, ignore, f"prefix = {prefix}\n", f"admin_login = {admin_login}\n", f"admin_haslo = {admin_haslo}\n"]
+    new_lines = [started, ignore, f"prefix = {prefix}\n", f"admin_login = {admin_login}\n", f"admin_pass = {admin_pass}\n"]
     if len(lines) > 5:
         new_lines.extend(lines[5:])
     
@@ -264,13 +306,36 @@ def zmien_dane():
     info.info()
     admin = False
 
+
+def zmien_dane_user():
+    global user_login, user_pass, lines, admin_login, admin_pass
+    new_login = input("Ustaw login użytkownika (Enter dla pozostawienia): ").strip()
+    new_password = stdiomask.getpass("Ustaw hasło użytkownika (Enter dla pozostawienia): ").strip()
+    if new_login:
+        user_login = new_login
+    if new_password:
+        user_pass = new_password
+
+    new_lines = [started, ignore, f"prefix = {prefix}\n", f"admin_login = {admin_login}\n",
+                 f"admin_pass = {admin_pass}\n", f"user_login = {user_login}\n",
+                 f"user_pass = {user_pass}\n",]
+    if len(lines) > 7:
+        new_lines.extend(lines[7:])
+
+    with open('config.txt', 'w', encoding='utf-8') as f:
+        f.writelines(new_lines)
+    lines = new_lines
+
+    clear()
+    info.info()
+
 def zmien_prefix():
     global prefix, lines
     new_prefix = input("Ustaw prefix (Enter dla pozostawienia): ").strip()
     if new_prefix:
         prefix = new_prefix
     
-    new_lines = [started, ignore, f"prefix = {prefix}\n", f"admin_login = {admin_login}\n", f"admin_haslo = {admin_haslo}\n"]
+    new_lines = [started, ignore, f"prefix = {prefix}\n", f"admin_login = {admin_login}\n", f"admin_pass = {admin_pass}\n"]
     if len(lines) > 5:
         new_lines.extend(lines[5:])
         
@@ -291,6 +356,8 @@ class adm(Prompt):
 class root_cmd(Prompt):
     prompt_suffix = Text.from_markup("[bold #00FFEA]> [/]")  # Tutaj wpisujesz co chcesz zamiast dwukropka
 # --- PĘTLA GŁÓWNA ---
+
+sprawdzenie_danych()
 
 while True: 
     print("")
@@ -400,6 +467,7 @@ while True:
 
     # 3. WBUDOWANE
     elif command_lower == "exit":
+        vim.test()
         stop()
 
     elif command_lower == "help":
@@ -496,9 +564,15 @@ while True:
             clear()
             info.info()
             continue
+        if not admin_login and not admin_pass:
+            clear()
+            print("Zalogowano jako administrator!")
+            print("Dostępne polecenia administratora: help na stronie nr. 2")
+            admin = True
+            continue
         login = Prompt.ask("Login")
         haslo = stdiomask.getpass("Hasło: ")
-        if login == admin_login and haslo == admin_haslo:
+        if login == admin_login and haslo == admin_pass:
             clear()
             print("Zalogowano jako administrator!")
             print("Dostępne polecenia administratora: help na stronie nr. 2")
@@ -509,7 +583,11 @@ while True:
         if not admin:
             print("Nie masz uprawnień administratora.")
             continue
-        zmien_dane()
+        konto = input("Do którego konta chcesz zmienić dane (user/admin): ")
+        if konto == "admin":
+            zmien_dane()
+        else:
+            zmien_dane_user()
     elif command_lower == "changeprefix":
         if not admin:
             print("Nie masz uprawnień administratora.")
@@ -571,6 +649,7 @@ while True:
             
             if wprowadzony_hash != zapisany_hash:
                 raise BladUprawnien()
+
             
             return True
 
@@ -595,3 +674,4 @@ while True:
         if command.strip():
             print(f"Nieznane polecenie: {command}")
             logging.warning(f"Nieznane polecenie: {command}")
+

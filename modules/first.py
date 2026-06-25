@@ -24,6 +24,14 @@ def main():
     console.print("[cyan]Ustal hasło administratora[/cyan]: ", end="")
     admin_password = stdiomask.getpass("")
 
+    user_login = Prompt.ask("[cyan]Ustal login użytkownika (domyślnie 'user')[/cyan]")
+    if user_login == "":
+        user_login = "user"
+    console.print("[cyan]Ustal hasło użytkownika[/cyan] (domyślnie puste): ", end="")
+    user_password = stdiomask.getpass("")
+    if user_password == "":
+        user_password = ""
+
     # Ścieżka do pliku config.txt  folderze nadrzędnym
     config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.txt")
 
@@ -38,7 +46,9 @@ def main():
 
             # Aktualizacja linii (zakładając strukturę z PyCMD.py)
             lines[3] = f"admin_login = {admin_login}\n"
-            lines[4] = f"admin_haslo = {admin_password}\n"
+            lines[4] = f"admin_pass = {admin_password}\n"
+            lines[5] = f"user_login = {user_login}\n"
+            lines[6] = f"user_pass = {user_password}\n"
 
             with open(config_path, 'w', encoding='utf8') as f:
                 f.writelines(lines)

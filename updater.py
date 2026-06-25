@@ -1,18 +1,17 @@
-import os
-import sys
-import time
-import shutil
-import urllib.request
-import urllib.error
-import zipfile
-import tempfile
-from pathlib import Path
-
 try:
+    import os
+    import sys
+    import time
+    import shutil
+    import urllib.request
+    import urllib.error
+    import zipfile
+    import tempfile
+    from pathlib import Path
     from rich.console import Console
     from rich.progress import Progress, SpinnerColumn, TextColumn
 except ImportError:
-    print("Brak modułu 'rich'. Zainstaluj go komendą: pip install rich")
+    print("Brak wystarczających modułów. Zainstaluj je komendą: pip install -r requirements.txt")
     sys.exit(1)
 
 console = Console()
